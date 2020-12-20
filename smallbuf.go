@@ -51,19 +51,47 @@ func (s *smallBuf) Bytes() []byte {
 	return nil
 }
 
-type smallWBuf []byte
+type smallWBuf struct {
+	b []byte
+	sum uint
+	n uint
+}
 
 func (s *smallWBuf) Write(b []byte) (int, error) {
-	*s = append(*s, b...)
-	return len(b), nil
+	s.b = append(s.b, b...)
+	return len(s.b), nil
 }
 
 func (s *smallWBuf) WriteByte(b byte) error {
-	*s = append(*s, b)
+	s.b = append(s.b, b)
 	return nil
 }
 
 func (s *smallWBuf) WriteString(ss string) (int, error) {
-	*s = append(*s, ss...)
+	s.b = append(s.b, ss...)
 	return len(ss), nil
+}
+
+func (s smallWBuf) Len() int {
+	return len(s.b)
+}
+
+func (s smallWBuf) Cap() int {
+	return cap(s.b)
+}
+
+func (s *smallWBuf) Trunc(n int) {
+	s.b = s.b[:n]
+}
+
+func (s *smallWBuf) Reset() {
+	s.sum = uint(uint64(s.sum) * 15 / 16) + uint(len(s.b))
+	if s.n < 16 {
+		s.n++
+	}
+	if cap(s.b) > 1024 && s.sum / s.n < uint(cap(s.b))/4 {
+		s.b = make([]byte, 0, s.sum/s.n)
+	} else {
+		s.b = s.b[:0]
+	}
 }

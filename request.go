@@ -352,25 +352,25 @@ func (conn *Connection) EvalAsync(expr string, args interface{}) *Future {
 
 func (fut *Future) pack(h *smallWBuf, enc *msgpack.Encoder, body func(*msgpack.Encoder) error) (err error) {
 	rid := fut.requestId
-	hl := len(*h)
-	*h = append(*h, smallWBuf{
+	hl := h.Len()
+	h.Write([]byte{
 		0xce, 0, 0, 0, 0, // length
 		0x82,                           // 2 element map
 		KeyCode, byte(fut.requestCode), // request code
 		KeySync, 0xce,
 		byte(rid >> 24), byte(rid >> 16),
 		byte(rid >> 8), byte(rid),
-	}...)
+	})
 
 	if err = body(enc); err != nil {
 		return
 	}
 
-	l := uint32(len(*h) - 5 - hl)
-	(*h)[hl+1] = byte(l >> 24)
-	(*h)[hl+2] = byte(l >> 16)
-	(*h)[hl+3] = byte(l >> 8)
-	(*h)[hl+4] = byte(l)
+	l := uint32(h.Len() - 5 - hl)
+	h.b[hl+1] = byte(l >> 24)
+	h.b[hl+2] = byte(l >> 16)
+	h.b[hl+3] = byte(l >> 8)
+	h.b[hl+4] = byte(l)
 
 	return
 }

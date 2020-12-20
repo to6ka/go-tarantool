@@ -442,7 +442,7 @@ func (conn *Connection) writeAuthRequest(w *bufio.Writer, scramble []byte) (err 
 	if err != nil {
 		return errors.New("auth: pack error " + err.Error())
 	}
-	if err := write(w, packet); err != nil {
+	if err := write(w, packet.b); err != nil {
 		return errors.New("auth: write error " + err.Error())
 	}
 	if err = w.Flush(); err != nil {
@@ -521,7 +521,7 @@ func (conn *Connection) closeConnection(neterr error, forever bool) (err error) 
 		conn.c = nil
 	}
 	for i := range conn.shard {
-		conn.shard[i].buf = conn.shard[i].buf[:0]
+		conn.shard[i].buf.Reset()
 		requests := &conn.shard[i].requests
 		for pos := range requests {
 			fut := requests[pos].first
@@ -621,14 +621,14 @@ func (conn *Connection) writer(w *bufio.Writer, c net.Conn) {
 		}
 		packet, shard.buf = shard.buf, packet
 		shard.bufmut.Unlock()
-		if len(packet) == 0 {
+		if packet.Len() == 0 {
 			continue
 		}
-		if err := write(w, packet); err != nil {
+		if err := write(w, packet.b); err != nil {
 			conn.reconnect(err, c)
 			return
 		}
-		packet = packet[0:0]
+		packet.Reset()
 	}
 }
 
@@ -717,14 +717,14 @@ func (conn *Connection) putFuture(fut *Future, body func(*msgpack.Encoder) error
 		return
 	default:
 	}
-	firstWritten := len(shard.buf) == 0
-	if cap(shard.buf) == 0 {
-		shard.buf = make(smallWBuf, 0, 128)
+	firstWritten := shard.buf.Len() == 0
+	if shard.buf.Cap() == 0 {
+		shard.buf.b = make([]byte, 0, 128)
 		shard.enc = msgpack.NewEncoder(&shard.buf)
 	}
-	blen := len(shard.buf)
+	blen := shard.buf.Len()
 	if err := fut.pack(&shard.buf, shard.enc, body); err != nil {
-		shard.buf = shard.buf[:blen]
+		shard.buf.Trunc(blen)
 		shard.bufmut.Unlock()
 		if f := conn.fetchFuture(fut.requestId); f == fut {
 			fut.markReady(conn)
