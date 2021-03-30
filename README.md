@@ -616,7 +616,7 @@ Features of the implementation:
 
 ## Multi connections
 
-You can use multiple connections config with tatantool/multi. 
+You can use multiple connections config with tarantool/multi. 
 
 Main features:
 
