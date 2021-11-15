@@ -439,7 +439,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Expected ErrTupleFound but got: %v", err)
 	}
 	if len(resp.Data) != 0 {
-		t.Errorf("Response Body len != 1")
+		t.Errorf("Response Body len != 0")
 	}
 
 	// Delete
