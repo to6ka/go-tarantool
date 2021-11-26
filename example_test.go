@@ -119,7 +119,7 @@ func Example() {
 	fmt.Println("Insert Data", resp.Data)
 
 	// insert new tuple { 11, 1 }
-	resp, err = client.Insert("test", &Tuple{Id: 10, Msg: "test", Name: "one"})
+	resp, err = client.Insert("test", &Tuple{Id: 11, Msg: "test", Name: "one"})
 	fmt.Println("Insert Error", err)
 	fmt.Println("Insert Code", resp.Code)
 	fmt.Println("Insert Data", resp.Data)
@@ -194,9 +194,9 @@ func Example() {
 	// Insert Error <nil>
 	// Insert Code 0
 	// Insert Data [[10 test one]]
-	// Insert Error Duplicate key exists in unique index 'primary' in space 'test' (0x3)
-	// Insert Code 3
-	// Insert Data []
+	// Insert Error <nil>
+	// Insert Code 0
+	// Insert Data [[11 test one]]
 	// Delete Error <nil>
 	// Delete Code 0
 	// Delete Data [[10 test one]]
