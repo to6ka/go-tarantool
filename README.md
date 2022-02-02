@@ -329,6 +329,57 @@ func main() {
 }
 ```
 
+To enable support of decimal in msgpack with
+[shopspring/decimal](https://github.com/shopspring/decimal),
+import tarantool/decimal submodule.
+```go
+package main
+
+import (
+	"log"
+	"time"
+
+	"github.com/shopspring/decimal"
+	"github.com/tarantool/go-tarantool"
+	_ "github.com/tarantool/go-tarantool/decimal"
+)
+
+func main() {
+	server := "127.0.0.1:3013"
+	opts := tarantool.Opts{
+		Timeout:       500 * time.Millisecond,
+		Reconnect:     1 * time.Second,
+		MaxReconnects: 3,
+		User:          "test",
+		Pass:          "test",
+	}
+	client, err := tarantool.Connect(server, opts)
+	if err != nil {
+		log.Fatalf("Failed to connect: %s", err.Error())
+	}
+
+	spaceNo := uint32(524)
+
+	number, err := decimal.NewFromString("-22.804")
+	if err != nil {
+		log.Fatalf("Failed to prepare test decimal: %s", err)
+	}
+
+	resp, err := client.Replace(spaceNo, []interface{}{number})
+	if err != nil {
+		log.Fatalf("Decimal replace failed: %s", err)
+	}
+	if resp == nil {
+		log.Fatalf("Response is nil after Replace")
+	}
+
+	log.Println("Decimal tuple replace")
+	log.Println("Error", err)
+	log.Println("Code", resp.Code)
+	log.Println("Data", resp.Data)
+}
+```
+
 ## Schema
 
 ```go
@@ -701,6 +752,12 @@ go clean -testcache && go test -v
 Use the same for main `tarantool` package and `queue` and `uuid` subpackages.
 `uuid` tests require
 [Tarantool 2.4.1 or newer](https://github.com/tarantool/tarantool/commit/d68fc29246714eee505bc9bbcd84a02de17972c5).
+
+Decimal tests require [Tarantool 2.2 or newer](https://github.com/tarantool/tarantool/issues/692).
+```bash
+cd decimal
+go clean -testcache && go test -v
+```
 
 ## Alternative connectors
 
