@@ -294,6 +294,11 @@ func (connMulti *ConnectionMulti) Eval(expr string, args interface{}) (resp *tar
 	return connMulti.getCurrentConnection().Eval(expr, args)
 }
 
+// Execute passes sql expression to Tarantool for execution.
+func (connMulti *ConnectionMulti) Execute(expr string, args ...interface{}) (resp *tarantool.Response, err error) {
+	return connMulti.getCurrentConnection().Execute(expr, args...)
+}
+
 func (connMulti *ConnectionMulti) GetTyped(space, index interface{}, key interface{}, result interface{}) (err error) {
 	return connMulti.getCurrentConnection().GetTyped(space, index, key, result)
 }

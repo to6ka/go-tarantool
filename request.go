@@ -2,6 +2,8 @@ package tarantool
 
 import (
 	"errors"
+	"reflect"
+	"strings"
 	"time"
 
 	"gopkg.in/vmihailenco/msgpack.v2"
@@ -118,6 +120,16 @@ func (conn *Connection) Call17(functionName string, args interface{}) (resp *Res
 // It is equal to conn.EvalAsync(space, tuple).Get().
 func (conn *Connection) Eval(expr string, args interface{}) (resp *Response, err error) {
 	return conn.EvalAsync(expr, args).Get()
+}
+
+// Execute passes sql expression to Tarantool for execution.
+//
+// It is equal to conn.ExecuteAsync(expr, args).Get().
+func (conn *Connection) Execute(expr string, args ...interface{}) (resp *Response, err error) {
+	if len(args) > 1 {
+		return conn.ExecuteAsync(expr, args).Get()
+	}
+	return conn.ExecuteAsync(expr, args[0]).Get()
 }
 
 // single used for conn.GetTyped for decode one tuple
@@ -346,9 +358,82 @@ func (conn *Connection) EvalAsync(expr string, args interface{}) *Future {
 	})
 }
 
+// ExecuteAsync sends a sql expression for execution and returns Future.
+func (conn *Connection) ExecuteAsync(expr string, args interface{}) *Future {
+	future := conn.newFuture(ExecuteRequest)
+	return future.send(conn, func(enc *msgpack.Encoder) error {
+		enc.EncodeMapLen(2)
+		enc.EncodeUint64(KeySQLText)
+		enc.EncodeString(expr)
+		enc.EncodeUint64(KeySQLBind)
+		return encodeSQLBind(enc, args)
+	})
+}
+
 //
 // private
 //
+func encodeSQLBind(enc *msgpack.Encoder, from interface{}) error {
+	// internal function for encoding single map in msgpack
+	encodeKeyVal := func(enc *msgpack.Encoder, key, val reflect.Value) error {
+		if err := enc.EncodeMapLen(1); err != nil {
+			return err
+		}
+		if err := enc.EncodeValue(key); err != nil {
+			return err
+		}
+		if err := enc.EncodeValue(val); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	val := reflect.ValueOf(from)
+	switch val.Kind() {
+	case reflect.Map:
+		if err := enc.EncodeSliceLen(val.Len()); err != nil {
+			return err
+		}
+		it := val.MapRange()
+		for it.Next() {
+			k := reflect.ValueOf(":" + it.Key().String())
+			v := it.Value()
+			if err := encodeKeyVal(enc, k, v); err != nil {
+				return err
+			}
+		}
+	case reflect.Struct:
+		if err := enc.EncodeSliceLen(val.NumField()); err != nil {
+			return err
+		}
+		for i := 0; i < val.NumField(); i++ {
+			key := val.Type().Field(i).Name
+			k := reflect.ValueOf(":" + strings.ToLower(key))
+			v := reflect.ValueOf(from).FieldByName(key)
+			if err := encodeKeyVal(enc, k, v); err != nil {
+				return err
+			}
+		}
+	case reflect.Slice, reflect.Array:
+		if val.Len() > 0 {
+			sliceType := reflect.ValueOf(val.Index(0).Interface()).Kind()
+			if sliceType != reflect.Struct {
+				return enc.Encode(from)
+			}
+		}
+		if err := enc.EncodeSliceLen(val.Len()); err != nil {
+			return err
+		}
+		for i := 0; i < val.Len(); i++ {
+			k := ":" + val.Index(i).Field(0).String()
+			v := val.Index(i).Field(1)
+			if err := encodeKeyVal(enc, reflect.ValueOf(k), v); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
 
 func (fut *Future) pack(h *smallWBuf, enc *msgpack.Encoder, body func(*msgpack.Encoder) error) (err error) {
 	rid := fut.requestId

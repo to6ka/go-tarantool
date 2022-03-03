@@ -11,8 +11,65 @@ type Response struct {
 	Code      uint32
 	Error     string // error message
 	// Data contains deserialized data for untyped requests
-	Data []interface{}
-	buf  smallBuf
+	Data     []interface{}
+	MetaData []ColumnMetaData
+	SQLInfo  SQLInfo
+	buf      smallBuf
+}
+
+type ColumnMetaData struct {
+	FieldName            string
+	FieldType            string
+	FieldCollation       string
+	FieldIsNullable      bool
+	FieldIsAutoincrement bool
+	FieldSpan            string
+}
+
+type SQLInfo struct {
+	AffectedCount        uint64
+	InfoAutoincrementIds []uint64
+}
+
+func parseMetaData(from []interface{}) []ColumnMetaData {
+	var metaData []ColumnMetaData
+
+	for i := 0; i < len(from); i++ {
+		mp := from[i].(map[interface{}]interface{})
+		cd := ColumnMetaData{}
+		cd.FieldName = mp[uint64(KeyFieldName)].(string)
+		cd.FieldType = mp[uint64(KeyFieldType)].(string)
+		if mp[uint64(KeyFieldColl)] != nil {
+			cd.FieldCollation = mp[uint64(KeyFieldColl)].(string)
+		}
+		if mp[uint64(KeyFieldIsNullable)] != nil {
+			cd.FieldIsNullable = mp[uint64(KeyFieldIsNullable)].(bool)
+		}
+		if mp[uint64(KeyIsAutoincrement)] != nil {
+			cd.FieldIsAutoincrement = mp[uint64(KeyIsAutoincrement)].(bool)
+		}
+		if mp[uint64(KeyFieldSpan)] != nil {
+			cd.FieldSpan = mp[uint64(KeyFieldSpan)].(string)
+		}
+		metaData = append(metaData, cd)
+	}
+
+	return metaData
+}
+
+func parseSQLInfo(from map[interface{}]interface{}) SQLInfo {
+	info := SQLInfo{}
+
+	info.AffectedCount = from[uint64(KeySQLInfoRowCount)].(uint64)
+	if from[uint64(KeySqlInfoAutoincrementIds)] != nil {
+		t := from[uint64(KeySqlInfoAutoincrementIds)].([]interface{})
+		ids := make([]uint64, len(t))
+		for i := range t {
+			ids[i] = t[i].(uint64)
+		}
+		info.InfoAutoincrementIds = ids
+	}
+	return info
 }
 
 func (resp *Response) fill(b []byte) {
@@ -90,6 +147,28 @@ func (resp *Response) decodeBody() (err error) {
 				if resp.Error, err = d.DecodeString(); err != nil {
 					return err
 				}
+			case KeySQLInfo:
+				var res interface{}
+				var castedRes map[interface{}]interface{}
+				var ok bool
+				if res, err = d.DecodeInterface(); err != nil {
+					return err
+				}
+				if castedRes, ok = res.(map[interface{}]interface{}); !ok {
+					return fmt.Errorf("sql info is not a map: %v", res)
+				}
+				resp.SQLInfo = parseSQLInfo(castedRes)
+			case KeyMetaData:
+				var res interface{}
+				var castedRes []interface{}
+				var ok bool
+				if res, err = d.DecodeInterface(); err != nil {
+					return err
+				}
+				if castedRes, ok = res.([]interface{}); !ok {
+					return fmt.Errorf("meta data is not array: %v", res)
+				}
+				resp.MetaData = parseMetaData(castedRes)
 			default:
 				if err = d.Skip(); err != nil {
 					return err
