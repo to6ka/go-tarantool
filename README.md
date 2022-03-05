@@ -329,6 +329,49 @@ func main() {
 }
 ```
 
+To enable support of datetime in msgpack with builtin module [time](https://pkg.go.dev/time),
+import `tarantool/datimetime` submodule.
+```go
+package main
+
+import (
+	"log"
+	"time"
+
+	"github.com/tarantool/go-tarantool"
+	_ "github.com/tarantool/go-tarantool/datetime"
+)
+
+func main() {
+	server := "127.0.0.1:3013"
+	opts := tarantool.Opts{
+		Timeout:       500 * time.Millisecond,
+		Reconnect:     1 * time.Second,
+		MaxReconnects: 3,
+		User:          "test",
+		Pass:          "test",
+	}
+	client, err := tarantool.Connect(server, opts)
+	if err != nil {
+		log.Fatalf("Failed to connect: %s", err.Error())
+	}
+	defer client.Close()
+
+	spaceNo := uint32(524)
+
+	tm, err := time.Parse(time.RFC3339, "2006-01-02T15:04:05Z")
+	if err != nil {
+		log.Fatalf("Failed to parse time: %s", err)
+	}
+
+	resp, err := client.Insert(spaceNo, []interface{}{tm})
+
+	log.Println("Error:", err)
+	log.Println("Code:", resp.Code)
+	log.Println("Data:", resp.Data)
+}
+```
+
 ## Schema
 
 ```go
@@ -698,9 +741,11 @@ and call
 ```bash
 go clean -testcache && go test -v
 ```
-Use the same for main `tarantool` package and `queue` and `uuid` subpackages.
+Use the same for main `tarantool` package, `queue`, `uuid` and `datetime` subpackages.
 `uuid` tests require
 [Tarantool 2.4.1 or newer](https://github.com/tarantool/tarantool/commit/d68fc29246714eee505bc9bbcd84a02de17972c5).
+`datetime` tests require
+[Tarantool 2.10 or newer](https://github.com/tarantool/tarantool/issues/5946).
 
 ## Alternative connectors
 
