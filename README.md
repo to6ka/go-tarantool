@@ -2,9 +2,11 @@
 	<img src="https://avatars2.githubusercontent.com/u/2344919?v=2&s=250" align="right">
 </a>
 
+[![testing](https://github.com/tarantool/go-tarantool/actions/workflows/testing.yml/badge.svg)](https://github.com/tarantool/go-tarantool/actions/workflows/testing.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/tarantool/go-tarantool.svg)](https://pkg.go.dev/github.com/tarantool/go-tarantool)
 [![Coverage Status](https://coveralls.io/repos/github/tarantool/go-tarantool/badge.svg?branch=master)](https://coveralls.io/github/tarantool/go-tarantool?branch=master)
 
-# Client in Go for Tarantool 1.6+
+# Client in Go for Tarantool
 
 The `go-tarantool` package has everything necessary for interfacing with
 [Tarantool 1.6+](http://tarantool.org/).
