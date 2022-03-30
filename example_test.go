@@ -85,7 +85,8 @@ func ExampleConnection_SelectTyped() {
 	// response is [{{} 1111 hello world}]
 }
 
-func Example() {
+// Example demonstrates how to use data operations.
+func Example_dataOperations() {
 	spaceNo := uint32(512)
 	indexNo := uint32(0)
 
@@ -103,72 +104,60 @@ func Example() {
 		return
 	}
 
+	// Ping a Tarantool instance to check connection
 	resp, err := client.Ping()
 	fmt.Println("Ping Code", resp.Code)
 	fmt.Println("Ping Data", resp.Data)
 	fmt.Println("Ping Error", err)
 
-	// delete tuple for cleaning
+	// Delete tuples with primary key { 10 } and { 11 }
 	client.Delete(spaceNo, indexNo, []interface{}{uint(10)})
-	client.Delete(spaceNo, indexNo, []interface{}{uint(11)})
+	// the same:
+	client.Delete("test", "primary", []interface{}{uint(11)})
 
-	// insert new tuple { 10, 1 }
+	// Insert a new tuple { 10, 1 }
 	resp, err = client.Insert(spaceNo, []interface{}{uint(10), "test", "one"})
-	fmt.Println("Insert Error", err)
-	fmt.Println("Insert Code", resp.Code)
-	fmt.Println("Insert Data", resp.Data)
 
-	// insert new tuple { 11, 1 }
+	// Insert a new tuple { 11, 1 }
 	resp, err = client.Insert("test", &Tuple{Id: 11, Msg: "test", Name: "one"})
-	fmt.Println("Insert Error", err)
-	fmt.Println("Insert Code", resp.Code)
-	fmt.Println("Insert Data", resp.Data)
 
-	// delete tuple with primary key { 10 }
+	// Delete a tuple with primary key { 10 }
 	resp, err = client.Delete(spaceNo, indexNo, []interface{}{uint(10)})
-	// or
-	// resp, err = client.Delete("test", "primary", UintKey{10}})
-	fmt.Println("Delete Error", err)
-	fmt.Println("Delete Code", resp.Code)
-	fmt.Println("Delete Data", resp.Data)
+	// the same:
+	resp, err = client.Delete("test", "primary", tarantool.UintKey{10})
 
-	// replace tuple with primary key 13
-	// note, Tuple is defined within tests, and has EncdodeMsgpack and DecodeMsgpack
-	// methods
+	// Replace tuple with primary key 13.
+	// Note, Tuple is defined within tests, and has EncdodeMsgpack and
+	// DecodeMsgpack methods.
 	resp, err = client.Replace(spaceNo, []interface{}{uint(13), 1})
-	fmt.Println("Replace Error", err)
-	fmt.Println("Replace Code", resp.Code)
-	fmt.Println("Replace Data", resp.Data)
+	// the same:
+	resp, err = client.Replace("test", []interface{}{uint(13), 1})
 
-	// update tuple with primary key { 13 }, incrementing second field by 3
+	// Update tuple with primary key { 13 }, incrementing second field by 3
 	resp, err = client.Update("test", "primary", tarantool.UintKey{13}, []tarantool.Op{{"+", 1, 3}})
-	// or
-	// resp, err = client.Update(spaceNo, indexNo, []interface{}{uint(13)}, []interface{}{[]interface{}{"+", 1, 3}})
-	fmt.Println("Update Error", err)
-	fmt.Println("Update Code", resp.Code)
-	fmt.Println("Update Data", resp.Data)
+	// the same:
+	resp, err = client.Update(spaceNo, indexNo, []interface{}{uint(13)}, []interface{}{[]interface{}{"+", 1, 3}})
 
-	// select just one tuple with primay key { 15 }
+	// Select just one tuple with primary key { 15 }
 	resp, err = client.Select(spaceNo, indexNo, 0, 1, tarantool.IterEq, []interface{}{uint(15)})
-	// or
-	// resp, err = client.Select("test", "primary", 0, 1, tarantool.IterEq, tarantool.UintKey{15})
-	fmt.Println("Select Error", err)
-	fmt.Println("Select Code", resp.Code)
-	fmt.Println("Select Data", resp.Data)
+	// the same:
+	resp, err = client.Select("test", "primary", 0, 1, tarantool.IterEq, tarantool.UintKey{15})
 
-	// call function 'func_name' with arguments
+	// Select tuples by condition ( primary key > 15 ) with offset 7 and limit 5.
+	// BTREE index is supposed.
+	resp, err = client.Select(spaceNo, indexNo, 7, 5, tarantool.IterGt, []interface{}{uint(15)})
+	// the same:
+	resp, err = client.Select("test", "primary", 7, 5, tarantool.IterGt, []interface{}{uint(15)})
+
+	// Call function 'func_name' with arguments
 	resp, err = client.Call17("simple_incr", []interface{}{1})
-	fmt.Println("Call17 Error", err)
-	fmt.Println("Call17 Code", resp.Code)
-	fmt.Println("Call17 Data", resp.Data)
 
-	// run raw Lua code
+	// Run raw Lua code
 	resp, err = client.Eval("return 1 + 2", []interface{}{})
-	fmt.Println("Eval Error", err)
-	fmt.Println("Eval Code", resp.Code)
-	fmt.Println("Eval Data", resp.Data)
 
+	// Replace
 	resp, err = client.Replace("test", &Tuple{Id: 11, Msg: "test", Name: "eleven"})
+	// the same:
 	resp, err = client.Replace("test", &Tuple{Id: 12, Msg: "test", Name: "twelve"})
 
 	var futs [3]*tarantool.Future
@@ -191,34 +180,10 @@ func Example() {
 	// Ping Code 0
 	// Ping Data []
 	// Ping Error <nil>
-	// Insert Error <nil>
-	// Insert Code 0
-	// Insert Data [[10 test one]]
-	// Insert Error <nil>
-	// Insert Code 0
-	// Insert Data [[11 test one]]
-	// Delete Error <nil>
-	// Delete Code 0
-	// Delete Data [[10 test one]]
-	// Replace Error <nil>
-	// Replace Code 0
-	// Replace Data [[13 1]]
-	// Update Error <nil>
-	// Update Code 0
-	// Update Data [[13 4]]
-	// Select Error <nil>
-	// Select Code 0
-	// Select Data [[15 val 15 bla]]
-	// Call17 Error <nil>
-	// Call17 Code 0
-	// Call17 Data [2]
-	// Eval Error <nil>
-	// Eval Code 0
-	// Eval Data [3]
 	// Fut 0 Error <nil>
 	// Fut 0 Data [{{} 12 test twelve} {{} 11 test eleven}]
 	// Fut 1 Error <nil>
-	// Fut 1 Data [[13 4]]
+	// Fut 1 Data [[13 7]]
 	// Fut 2 Error <nil>
 	// Fut 2 Data [[15 val 15 bla]]
 }
