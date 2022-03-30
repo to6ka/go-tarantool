@@ -21,7 +21,7 @@ faster than other packages according to public benchmarks.
 * [Installation](#installation)
 * [Hello World](#hello-world)
 * [API reference](#api-reference)
-* [Walking\-through example in Go](#walking-through-example-in-go)
+* [Walking\-through example](#walking-through-example)
 * [Help](#help)
 * [Usage](#usage)
 * [Schema](#schema)
@@ -108,7 +108,7 @@ The source file for error-handling tools is
 which has structure definitions and constants whose names are equivalent to names
 of errors that the Tarantool server returns.
 
-## Walking-through example in Go
+## Walking-through example
 
 We can now have a closer look at the `example.go` program and make some observations
 about what it does.
