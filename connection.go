@@ -110,9 +110,8 @@ func (d defaultLogger) Report(event ConnLogKind, conn *Connection, v ...interfac
 // msgpack array, cause Tarantool always returns result as an array.
 // For all space related methods and Call* (but not Call17*) methods Tarantool
 // always returns array of array (array of tuples for space related methods).
-// For Eval* and Call17* tarantool always returns array, but does not forces
+// For Eval* and Call17* Tarantool always returns array, but does not forces
 // array of arrays.
-
 type Connection struct {
 	addr  string
 	c     net.Conn
@@ -120,7 +119,7 @@ type Connection struct {
 	// Schema contains schema loaded on connection.
 	Schema    *Schema
 	requestId uint32
-	// Greeting contains first message sent by tarantool
+	// Greeting contains first message sent by Tarantool
 	Greeting *Greeting
 
 	shard      []connShard
@@ -148,7 +147,7 @@ type connShard struct {
 	_pad   [16]uint64
 }
 
-// Greeting is a message sent by tarantool on connect.
+// Greeting is a message sent by Tarantool on connect
 type Greeting struct {
 	Version string
 	auth    string
@@ -160,7 +159,7 @@ type Opts struct {
 	// Also used to setup net.TCPConn.Set(Read|Write)Deadline
 	Timeout time.Duration
 	// Reconnect is a pause between reconnection attempts.
-	// If specified, then when tarantool is not reachable or disconnected,
+	// If specified, then when Tarantool is not reachable or disconnected,
 	// new connect attempt is performed after pause.
 	// By default, no reconnection attempts are performed,
 	// so once disconnected, connection becomes Closed.
@@ -172,7 +171,7 @@ type Opts struct {
 	User string
 	// Pass is password for authorization
 	Pass string
-	// RateLimit limits number of 'in-fly' request, ie already put into
+	// RateLimit limits number of 'in-fly' request, i.e. already put into
 	// requests queue, but not yet answered by server or timeouted.
 	// It is disabled by default.
 	// See RLimitAction for possible actions when RateLimit.reached.
@@ -191,7 +190,7 @@ type Opts struct {
 	// By default it is runtime.GOMAXPROCS(-1) * 4
 	Concurrency uint32
 	// SkipSchema disables schema loading. Without disabling schema loading,
-	// there is no way to create Connection for currently not accessible tarantool.
+	// there is no way to create Connection for currently not accessible Tarantool.
 	SkipSchema bool
 	// Notify is a channel which receives notifications about Connection status
 	// changes.
@@ -207,25 +206,27 @@ type Opts struct {
 // Address could be specified in following ways:
 //
 // TCP connections:
-// - tcp://192.168.1.1:3013
-// - tcp://my.host:3013
-// - tcp:192.168.1.1:3013
-// - tcp:my.host:3013
-// - 192.168.1.1:3013
-// - my.host:3013
+//  - tcp://192.168.1.1:3013
+//  - tcp://my.host:3013
+//  - tcp:192.168.1.1:3013
+//  - tcp:my.host:3013
+//  - 192.168.1.1:3013
+//  - my.host:3013
+//
 // Unix socket:
-// - unix:///abs/path/tnt.sock
-// - unix:path/tnt.sock
-// - /abs/path/tnt.sock  - first '/' indicates unix socket
-// - ./rel/path/tnt.sock - first '.' indicates unix socket
-// - unix/:path/tnt.sock  - 'unix/' acts as a "host" and "/path..." as a port
+//  - unix:///abs/path/tnt.sock
+//  - unix:path/tnt.sock
+//  - /abs/path/tnt.sock  - first '/' indicates unix socket
+//  - ./rel/path/tnt.sock - first '.' indicates unix socket
+//  - unix/:path/tnt.sock - 'unix/' acts as a "host" and "/path..." as a port
 //
 // Note:
 //
 // - If opts.Reconnect is zero (default), then connection either already connected
 // or error is returned.
 //
-// - If opts.Reconnect is non-zero, then error will be returned only if authorization// fails. But if Tarantool is not reachable, then it will attempt to reconnect later
+// - If opts.Reconnect is non-zero, then error will be returned only if authorization
+// fails. But if Tarantool is not reachable, then it will attempt to reconnect later
 // and will not end attempts on authorization failures.
 func Connect(addr string, opts Opts) (conn *Connection, err error) {
 	conn = &Connection{
@@ -272,7 +273,7 @@ func Connect(addr string, opts Opts) (conn *Connection, err error) {
 			return nil, err
 		} else if ok && (ter.Code == ErrNoSuchUser ||
 			ter.Code == ErrPasswordMismatch) {
-			/* reported auth errors immediatly */
+			/* reported auth errors immediately */
 			return nil, err
 		} else {
 			// without SkipSchema it is useless

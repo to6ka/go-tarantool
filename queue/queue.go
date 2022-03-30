@@ -8,7 +8,7 @@ import (
 	msgpack "gopkg.in/vmihailenco/msgpack.v2"
 )
 
-// Queue is a handle to tarantool queue's tube
+// Queue is a handle to Tarantool queue's tube
 type Queue interface {
 	// Exists checks tube for existence
 	// Note: it uses Eval, so user needs 'execute universe' privilege

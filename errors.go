@@ -10,26 +10,28 @@ type Error struct {
 	Msg  string
 }
 
+// Error converts an Error to a string
 func (tnterr Error) Error() string {
 	return fmt.Sprintf("%s (0x%x)", tnterr.Msg, tnterr.Code)
 }
 
 // ClientError is connection produced by this client,
-// ie connection failures or timeouts.
+// i.e. connection failures or timeouts.
 type ClientError struct {
 	Code uint32
 	Msg  string
 }
 
+// Error converts a ClientError to a string
 func (clierr ClientError) Error() string {
 	return fmt.Sprintf("%s (0x%x)", clierr.Msg, clierr.Code)
 }
 
 // Temporary returns true if next attempt to perform request may succeeed.
 // Currently it returns true when:
-// - Connection is not connected at the moment,
-// - or request is timeouted,
-// - or request is aborted due to rate limit.
+//  - Connection is not connected at the moment,
+//  - or request is timeouted,
+//  - or request is aborted due to rate limit.
 func (clierr ClientError) Temporary() bool {
 	switch clierr.Code {
 	case ErrConnectionNotReady, ErrTimeouted, ErrRateLimited:

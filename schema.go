@@ -13,13 +13,13 @@ type Schema struct {
 	SpacesById map[uint32]*Space
 }
 
-// Space contains information about tarantool space
+// Space contains information about Tarantool's space.
 type Space struct {
 	Id        uint32
 	Name      string
 	Engine    string
-	Temporary bool // Is this space temporaray?
-	// Field configuration is not mandatory and not checked by tarantool.
+	Temporary bool // Is this space temporary?
+	// Field configuration is not mandatory and not checked by Tarantool.
 	FieldsCount uint32
 	Fields      map[string]*Field
 	FieldsById  map[uint32]*Field

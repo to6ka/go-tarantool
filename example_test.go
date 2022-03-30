@@ -162,7 +162,7 @@ func Example() {
 	fmt.Println("Call17 Code", resp.Code)
 	fmt.Println("Call17 Data", resp.Data)
 
-	// run raw lua code
+	// run raw Lua code
 	resp, err = client.Eval("return 1 + 2", []interface{}{})
 	fmt.Println("Eval Error", err)
 	fmt.Println("Eval Code", resp.Code)
