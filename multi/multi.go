@@ -29,6 +29,11 @@ func indexOf(sstring string, data []string) int {
 	return -1
 }
 
+// You can use multiple connections config with tarantool/multi.
+// Main features:
+//  - Check active connection with configurable time interval and on connection
+//  fail switch to next in pool.
+//  - Get addresses list from server and reconfigure to use in MultiConnection.
 type ConnectionMulti struct {
 	addrs    []string
 	connOpts tarantool.Opts
@@ -46,8 +51,14 @@ var _ = tarantool.Connector(&ConnectionMulti{}) // check compatibility with conn
 
 // OptsMulti is a way to configure Connection with multiconnect-specific options.
 type OptsMulti struct {
-	CheckTimeout         time.Duration
+	//  CheckTimeout is a time interval to check for connection timeout and try to
+	//  switch connection.
+	CheckTimeout time.Duration
+	//  NodesGetFunctionName is a server Lua function name to call for getting
+	//  address list.
 	NodesGetFunctionName string
+	//  ClusterDiscoveryTime is a time interval to ask server for updated address
+	//  list (works on with NodesGetFunctionName set).
 	ClusterDiscoveryTime time.Duration
 }
 
