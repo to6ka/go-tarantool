@@ -28,21 +28,12 @@ faster than other packages according to public benchmarks.
 
 ## Installation
 
-We assume that you have Tarantool version 1.6 and a modern Linux or BSD
+We assume that you have Tarantool version 1.6+ and a modern Linux or BSD
 operating system.
 
-You will need a current version of `go`, version 1.3 or later (use
-`go version` to check the version number). Do not use `gccgo-go`.
-
-**Note:** If your `go` version is younger than 1.3, or if `go` is not installed,
-download the latest tarball from [golang.org](https://golang.org/dl/) and say:
-
-```bash
-$ sudo tar -C /usr/local -xzf go1.7.5.linux-amd64.tar.gz
-$ export PATH=$PATH:/usr/local/go/bin
-$ export GOPATH="/usr/local/go/go-tarantool"
-$ sudo chmod -R a+rwx /usr/local/go </pre>
-```
+You will need a current version of `go`, version 1.13 or later (use `go version`
+to check the version number). Do not use `gccgo-go`. Lean more about Go
+installation on [official site](https://go.dev/doc/install).
 
 The `go-tarantool` package is in
 [tarantool/go-tarantool](github.com/tarantool/go-tarantool) repository.
