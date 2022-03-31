@@ -61,39 +61,20 @@ database.
 
 <h2>API reference</h2>
 
-Read the [Tarantool manual](http://tarantool.org/doc.html) to find descriptions
-of terms like "connect", "space", "index", and the requests for creating and
-manipulating database objects or Lua functions.
+Read the [Tarantool documentation](https://www.tarantool.io/en/doc/latest/book/box/data_model/)
+to find descriptions of terms like "connect", "space", "index", and the
+requests for creating and manipulating database objects or Lua functions.
 
-The source files for the requests library are:
-* [connection.go](https://github.com/tarantool/go-tarantool/blob/master/connection.go)
-  for the `Connect()` function plus functions related to connecting, and
-* [request.go](https://github.com/tarantool/go-tarantool/blob/master/request.go)
-  for data-manipulation functions and Lua invocations.
+Learn API documentation and examples at
+[pkg.go.dev](https://pkg.go.dev/github.com/tarantool/go-tarantool).
 
-See comments in those files for syntax details:
-```
-Ping
-closeConnection
-Select
-Insert
-Replace
-Delete
-Update
-Upsert
-Call
-Call17
-Eval
-```
+In general connector methods can be divided into two main parts:
+- `Connect()` function plus functions related to connecting, and
+- data-manipulation functions and Lua invocations.
 
-The supported requests have parameters and results equivalent to requests in the
-Tarantool manual. There are also Typed and Async versions of each data-manipulation
-function.
-
-The source file for error-handling tools is
-[errors.go](https://github.com/tarantool/go-tarantool/blob/master/errors.go),
-which has structure definitions and constants whose names are equivalent to names
-of errors that the Tarantool server returns.
+The supported requests have parameters and results equivalent to requests in
+the [Tarantool CRUD operations](https://www.tarantool.io/en/doc/latest/reference/reference_lua/box_space/).
+There are also Typed and Async versions of each data-manipulation function.
 
 ## Walking-through example
 
