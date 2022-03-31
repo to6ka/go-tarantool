@@ -15,6 +15,26 @@ test:
 	go clean -testcache
 	go test ./... -v -p 1	
 
+.PHONY: test-multi
+test-multi:
+	go clean -testcache
+	go test ./multi/ -v -p 1
+
+.PHONY: test-queue
+test-queue:
+	go clean -testcache
+	go test ./queue/ -v -p 1
+
+.PHONY: test-uuid
+test-uuid:
+	go clean -testcache
+	go test ./uuid/ -v -p 1
+
+.PHONY: test-main
+test-main:
+	go clean -testcache
+	go test . -v -p 1
+
 .PHONY: coverage
 coverage:
 	go clean -testcache
