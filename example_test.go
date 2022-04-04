@@ -2,6 +2,7 @@ package tarantool_test
 
 import (
 	"fmt"
+	"github.com/tarantool/go-tarantool/test_helpers"
 	"time"
 
 	"github.com/tarantool/go-tarantool"
@@ -42,7 +43,7 @@ func ExampleConnection_Select() {
 		return
 	}
 	defer conn.Close()
-	resp, err := conn.Select(512, 0, 0, 100, tarantool.IterEq, []interface{}{uint(1111)})
+	resp, err := conn.Select(517, 0, 0, 100, tarantool.IterEq, []interface{}{uint(1111)})
 	if err != nil {
 		fmt.Printf("error in select is %v", err)
 		return
@@ -68,7 +69,7 @@ func ExampleConnection_SelectTyped() {
 	}
 	defer conn.Close()
 	var res []Tuple
-	err = conn.SelectTyped(512, 0, 0, 100, tarantool.IterEq, tarantool.IntKey{1111}, &res)
+	err = conn.SelectTyped(517, 0, 0, 100, tarantool.IterEq, tarantool.IntKey{1111}, &res)
 	if err != nil {
 		fmt.Printf("error in select is %v", err)
 		return
@@ -86,7 +87,7 @@ func ExampleConnection_SelectTyped() {
 }
 
 func Example() {
-	spaceNo := uint32(512)
+	spaceNo := uint32(517)
 	indexNo := uint32(0)
 
 	server := "127.0.0.1:3013"
@@ -221,4 +222,105 @@ func Example() {
 	// Fut 1 Data [[13 4]]
 	// Fut 2 Error <nil>
 	// Fut 2 Data [[15 val 15 bla]]
+}
+
+// To use SQL to query a tarantool instance, call `Execute`.
+//
+// Pay attention that with different types of queries (DDL, DQL, DML etc.)
+// some fields of the response structure (`MetaData` and `InfoAutoincrementIds` in `SQLInfo`) may be nil.
+//
+// See the [protocol](https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#responses-for-sql)
+// explanation for details.
+func ExampleSQL() {
+	// Tarantool supports SQL since version 2.0.0
+	isLess, _ := test_helpers.IsTarantoolVersionLess(2, 0, 0)
+	if isLess {
+		return
+	}
+	server := "127.0.0.1:3013"
+	opts := tarantool.Opts{
+		Timeout:       500 * time.Millisecond,
+		Reconnect:     1 * time.Second,
+		MaxReconnects: 3,
+		User:          "test",
+		Pass:          "test",
+	}
+	client, err := tarantool.Connect(server, opts)
+	if err != nil {
+		fmt.Errorf("Failed to connect: %s", err.Error())
+	}
+
+	resp, err := client.Execute("CREATE TABLE SQL_TEST (id INTEGER PRIMARY KEY, name STRING)", []interface{}{})
+	fmt.Println("Execute")
+	fmt.Println("Error", err)
+	fmt.Println("Code", resp.Code)
+	fmt.Println("Data", resp.Data)
+	fmt.Println("MetaData", resp.MetaData)
+	fmt.Println("SQL Info", resp.SQLInfo)
+
+	// there are 3 options to pass named parameters to an SQL query
+	sqlBind1 := map[string]interface{}{
+		"id":   1,
+		"name": "test",
+	}
+
+	sqlBind2 := struct {
+		Id   int
+		Name string
+	}{1, "test"}
+
+	type kv struct {
+		Key   string
+		Value interface{}
+	}
+
+	sqlBind3 := []kv{
+		kv{"id", 1},
+		kv{"name", "test"},
+	}
+
+	// the next usage
+	resp, err = client.Execute("SELECT id FROM SQL_TEST WHERE id=:id AND name=:name", sqlBind1)
+	fmt.Println("Execute")
+	fmt.Println("Error", err)
+	fmt.Println("Code", resp.Code)
+	fmt.Println("Data", resp.Data)
+	fmt.Println("MetaData", resp.MetaData)
+	fmt.Println("SQL Info", resp.SQLInfo)
+
+	// the same as
+	resp, err = client.Execute("SELECT id FROM SQL_TEST WHERE id=:id AND name=:name", sqlBind2)
+	fmt.Println("Execute")
+	fmt.Println("Error", err)
+	fmt.Println("Code", resp.Code)
+	fmt.Println("Data", resp.Data)
+	fmt.Println("MetaData", resp.MetaData)
+	fmt.Println("SQL Info", resp.SQLInfo)
+
+	// the same as
+	resp, err = client.Execute("SELECT id FROM SQL_TEST WHERE id=:id AND name=:name", sqlBind3)
+	fmt.Println("Execute")
+	fmt.Println("Error", err)
+	fmt.Println("Code", resp.Code)
+	fmt.Println("Data", resp.Data)
+	fmt.Println("MetaData", resp.MetaData)
+	fmt.Println("SQL Info", resp.SQLInfo)
+
+	// there are 2 options to pass positional arguments to an SQL query
+	resp, err = client.Execute("SELECT id FROM SQL_TEST WHERE id=? AND name=?", 1, "test")
+	fmt.Println("Execute")
+	fmt.Println("Error", err)
+	fmt.Println("Code", resp.Code)
+	fmt.Println("Data", resp.Data)
+	fmt.Println("MetaData", resp.MetaData)
+	fmt.Println("SQL Info", resp.SQLInfo)
+
+	// the same as
+	resp, err = client.Execute("SELECT id FROM SQL_TEST WHERE id=? AND name=?", []interface{}{2, "test"})
+	fmt.Println("Execute")
+	fmt.Println("Error", err)
+	fmt.Println("Code", resp.Code)
+	fmt.Println("Data", resp.Data)
+	fmt.Println("MetaData", resp.MetaData)
+	fmt.Println("SQL Info", resp.SQLInfo)
 }
