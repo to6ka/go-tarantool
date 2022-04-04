@@ -6,13 +6,13 @@ box.cfg{
 
 box.once("init", function()
     local s = box.schema.space.create('test', {
-        id = 512,
+        id = 517,
         if_not_exists = true,
     })
     s:create_index('primary', {type = 'tree', parts = {1, 'uint'}, if_not_exists = true})
 
     local st = box.schema.space.create('schematest', {
-        id = 514,
+        id = 516,
         temporary = true,
         if_not_exists = true,
         field_count = 7,
@@ -49,6 +49,10 @@ box.once("init", function()
     box.schema.user.grant('test', 'execute', 'universe')
     box.schema.user.grant('test', 'read,write', 'space', 'test')
     box.schema.user.grant('test', 'read,write', 'space', 'schematest')
+
+    -- grants for sql tests
+    box.schema.user.grant('test', 'create,read,write,drop,alter', 'space')
+    box.schema.user.grant('test', 'create', 'sequence')
 end)
 
 local function simple_incr(a)
