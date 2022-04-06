@@ -385,6 +385,81 @@ func BenchmarkClientParallelMassiveUntyped(b *testing.B) {
 	close(limit)
 }
 
+func BenchmarkConnection_PointSelect(b *testing.B) {
+	b.StopTimer()
+	conn, err := Connect(server, opts)
+	if err != nil {
+		b.Errorf("No connection available")
+		return
+	}
+	defer conn.Close()
+
+	schema := conn.Schema
+	rSpaceNo, rIndexNo, err := schema.ResolveSpaceIndex("test_perf", "primary")
+	if err != nil {
+		b.Errorf("symbolic space and index params not resolved")
+	}
+	b.StartTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, err := conn.Select(rSpaceNo, rIndexNo, 0, 1, IterEq, []interface{}{uint32(1)})
+			if err != nil {
+				b.Errorf("No connection available: %s", err)
+				return
+			}
+		}
+	})
+}
+
+func BenchmarkConnection_Replace(b *testing.B) {
+	b.StopTimer()
+	conn, err := Connect(server, opts)
+	if err != nil {
+		b.Errorf("No connection available")
+		return
+	}
+	defer conn.Close()
+	spaceNo = 520
+
+	b.StartTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, err := conn.Replace(spaceNo, []interface{}{uint(1), "hello", []interface{}{}})
+			if err != nil {
+				b.Log(err)
+				b.Errorf("No connection available")
+			}
+		}
+	})
+}
+
+func BenchmarkConnection_LargeSelect(b *testing.B) {
+	b.StopTimer()
+	conn, err := Connect(server, opts)
+	if err != nil {
+		b.Errorf("No connection available")
+		return
+	}
+	defer conn.Close()
+
+	schema := conn.Schema
+	rSpaceNo, rIndexNo, err := schema.ResolveSpaceIndex("test_perf", "secondary")
+	if err != nil {
+		b.Errorf("symbolic space and index params not resolved")
+	}
+
+	b.StartTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, err := conn.Select(rSpaceNo, rIndexNo, 0, 10000000, IterEq, []interface{}{"test_name"})
+			if err != nil {
+				b.Errorf("No connection available: %s", err)
+				return
+			}
+		}
+	})
+}
+
 ///////////////////
 
 func TestClient(t *testing.T) {

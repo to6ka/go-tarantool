@@ -25,3 +25,8 @@ coverage:
 coveralls: coverage
 	go get github.com/mattn/goveralls
 	goveralls -coverprofile=$(COVERAGE_FILE) -service=github
+
+.PHONY: bench
+bench:
+	go clean -testcache
+	go test -bench=. -benchmem -benchtime=1s
