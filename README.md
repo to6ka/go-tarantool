@@ -704,6 +704,11 @@ Use the same for main `tarantool` package and `queue` and `uuid` subpackages.
 `uuid` tests require
 [Tarantool 2.4.1 or newer](https://github.com/tarantool/tarantool/commit/d68fc29246714eee505bc9bbcd84a02de17972c5).
 
+To run benchmark tests, call
+```bash
+make bench
+```
+
 ## Alternative connectors
 
 There are two more connectors from the open-source community available:
