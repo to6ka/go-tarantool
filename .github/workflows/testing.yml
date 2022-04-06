@@ -63,3 +63,6 @@ jobs:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           make coveralls
+
+      - name: Run becnchmark
+        run: make bench
