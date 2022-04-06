@@ -1,5 +1,15 @@
 # Hacking
 
+## First steps
+
+Clone the repository and install dependencies.
+
+```sh
+$ git clone git@github.com:/tarantool/go-tarantool
+$ cd go-tarantool
+$ go get .
+```
+
 ## Running tests
 
 You need to [install Tarantool](https://www.tarantool.io/en/download/) to run tests.
