@@ -44,6 +44,12 @@ const (
 	// LogUnexpectedResultId is logged when response with unknown id were received.
 	// Most probably it is due to request timeout.
 	LogUnexpectedResultId
+	// LogConnected is logged when connection is established or reestablished
+	LogConnected
+	// LogDisconnected is logged when connection is broken
+	LogDisconnected
+	// LogClosed is logged when connection is closed forever
+	LogClosed
 )
 
 // ConnEvent is sent throw Notify channel specified in Opts
@@ -74,6 +80,8 @@ func (d defaultLogger) Report(event ConnLogKind, conn *Connection, v ...interfac
 	case LogUnexpectedResultId:
 		resp := v[0].(*Response)
 		log.Printf("tarantool: connection %s got unexpected resultId (%d) in response", conn.addr, resp.RequestId)
+	case LogConnected, LogDisconnected, LogClosed:
+		// ignore by default
 	default:
 		args := append([]interface{}{"tarantool: unexpected event ", event, conn}, v...)
 		log.Print(args...)
@@ -156,6 +164,8 @@ type Greeting struct {
 
 // Opts is a way to configure Connection
 type Opts struct {
+	// ConnectTimeout is used for connection dial
+	ConnectTimeout time.Duration
 	// Timeout is requests timeout.
 	// Also used to setup net.TCPConn.Set(Read|Write)Deadline
 	Timeout time.Duration
@@ -168,6 +178,8 @@ type Opts struct {
 	// MaxReconnects is a maximum reconnect attempts.
 	// After MaxReconnects attempts Connection becomes closed.
 	MaxReconnects uint
+	// Ping interval is used for tuning pinger frequency
+	PingInterval time.Duration
 	// User name for authorization
 	User string
 	// Pass is password for authorization
@@ -358,11 +370,9 @@ func (conn *Connection) dial() (err error) {
 	var connection net.Conn
 	network := "tcp"
 	address := conn.addr
-	timeout := conn.opts.Reconnect / 2
+	timeout := conn.opts.ConnectTimeout
 	if timeout == 0 {
 		timeout = 500 * time.Millisecond
-	} else if timeout > 5*time.Second {
-		timeout = 5 * time.Second
 	}
 	// Unix socket connection
 	addrLen := len(address)
@@ -480,6 +490,7 @@ func (conn *Connection) createConnection(reconnect bool) (err error) {
 		err = conn.dial()
 		if err == nil || !reconnect {
 			if err == nil {
+				conn.opts.Logger.Report(LogConnected, conn)
 				conn.notify(Connected)
 			}
 			return
@@ -510,10 +521,12 @@ func (conn *Connection) closeConnection(neterr error, forever bool) (err error) 
 		if conn.state != connClosed {
 			close(conn.control)
 			atomic.StoreUint32(&conn.state, connClosed)
+			conn.opts.Logger.Report(LogClosed, conn, neterr)
 			conn.notify(Closed)
 		}
 	} else {
 		atomic.StoreUint32(&conn.state, connDisconnected)
+		conn.opts.Logger.Report(LogDisconnected, conn, neterr)
 		conn.notify(Disconnected)
 	}
 	if conn.c != nil {
@@ -567,11 +580,11 @@ func (conn *Connection) unlockShards() {
 }
 
 func (conn *Connection) pinger() {
-	to := conn.opts.Timeout
+	to := conn.opts.PingInterval
 	if to == 0 {
-		to = 3 * time.Second
+		to = time.Second
 	}
-	t := time.NewTicker(to / 3)
+	t := time.NewTicker(to)
 	defer t.Stop()
 	for {
 		select {
