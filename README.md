@@ -19,9 +19,7 @@ faster than other packages according to public benchmarks.
 ## Table of contents
 
 * [Installation](#installation)
-* [Hello World](#hello-world)
-* [API reference](#api-reference)
-* [Walking\-through example](#walking-through-example)
+* [Documentation](#documentation)
 * [Help](#help)
 * [Contributing](#contributing)
 * [Alternative connectors](#alternative-connectors)
@@ -47,19 +45,9 @@ This should bring source and binary files into subdirectories of `/usr/local/go`
 making it possible to access by adding `github.com/tarantool/go-tarantool` in
 the `import {...}` section at the start of any Go program.
 
-<h2>Hello World</h2>
+## Documentation
 
-In the "[Connectors](https://www.tarantool.io/en/doc/latest/getting_started/getting_started_go/)"
-chapter of the Tarantool manual, there is an explanation of a very short (18-line)
-program written in Go. Follow the instructions at the start of the "Connectors"
-chapter carefully. Then cut and paste the example into a file named `example.go`,
-and run it. You should see: nothing.
-
-If that is what you see, then you have successfully installed `go-tarantool` and
-successfully executed a program that manipulated the contents of a Tarantool
-database.
-
-<h2>API reference</h2>
+### API Reference
 
 Read the [Tarantool documentation](https://www.tarantool.io/en/doc/latest/book/box/data_model/)
 to find descriptions of terms like "connect", "space", "index", and the
@@ -76,31 +64,42 @@ The supported requests have parameters and results equivalent to requests in
 the [Tarantool CRUD operations](https://www.tarantool.io/en/doc/latest/reference/reference_lua/box_space/).
 There are also Typed and Async versions of each data-manipulation function.
 
-## Walking-through example
+### Hello World example
+
+In the "[Connectors](https://www.tarantool.io/en/doc/latest/getting_started/getting_started_go/)"
+chapter of the Tarantool manual, there is an explanation of a very short (18-line)
+program written in Go. Follow the instructions at the start of the "Connectors"
+chapter carefully. Then cut and paste the example into a file named `example.go`,
+and run it. You should see: nothing.
+
+If that is what you see, then you have successfully installed `go-tarantool` and
+successfully executed a program that manipulated the contents of a Tarantool
+database.
+
+### Walking-through example
 
 We can now have a closer look at the `example.go` program and make some observations
 about what it does.
 
 ```go
-package main
+package tarantool_test
 
 import (
-     "fmt"
-     "github.com/tarantool/go-tarantool"
+	"fmt"
+	"github.com/tarantool/go-tarantool"
 )
 
-func main() {
-   opts := tarantool.Opts{User: "guest"}
-   conn, err := tarantool.Connect("127.0.0.1:3301", opts)
-   // conn, err := tarantool.Connect("/path/to/tarantool.socket", opts)
-   if err != nil {
-       fmt.Println("Connection refused:", err)
-   }
-   resp, err := conn.Insert(999, []interface{}{99999, "BB"})
-   if err != nil {
-     fmt.Println("Error", err)
-     fmt.Println("Code", resp.Code)
-   }
+func Example_walkThrough() {
+	opts := tarantool.Opts{User: "guest"}
+	conn, err := tarantool.Connect("127.0.0.1:3301", opts)
+	if err != nil {
+		fmt.Println("Connection refused:", err)
+	}
+	resp, err := conn.Insert(999, []interface{}{99999, "BB"})
+	if err != nil {
+		fmt.Println("Error", err)
+		fmt.Println("Code", resp.Code)
+	}
 }
 ```
 
