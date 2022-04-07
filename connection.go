@@ -44,6 +44,10 @@ const (
 	// LogUnexpectedResultId is logged when response with unknown id were received.
 	// Most probably it is due to request timeout.
 	LogUnexpectedResultId
+	// Disconnect signals that connection is broken
+	LogDisconnected
+	// Either reconnect attempts exhausted, or explicit Close is called
+	LogClosed
 )
 
 // ConnEvent is sent throw Notify channel specified in Opts
@@ -510,10 +514,12 @@ func (conn *Connection) closeConnection(neterr error, forever bool) (err error) 
 		if conn.state != connClosed {
 			close(conn.control)
 			atomic.StoreUint32(&conn.state, connClosed)
+			conn.opts.Logger.Report(LogClosed, conn, neterr)
 			conn.notify(Closed)
 		}
 	} else {
 		atomic.StoreUint32(&conn.state, connDisconnected)
+		conn.opts.Logger.Report(LogDisconnected, conn, neterr)
 		conn.notify(Disconnected)
 	}
 	if conn.c != nil {
