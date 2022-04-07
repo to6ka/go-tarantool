@@ -30,3 +30,18 @@ coveralls: coverage
 bench:
 	go clean -testcache
 	go test -bench=. -benchmem -benchtime=1s
+
+.PHONY: ab-perf
+ab-perf:
+	export TNT_CUR_BRANCH=$(git branch --show-current)
+	go clean -testcache
+	go test -bench=. -benchmem -benchtime=1s > b.txt
+	git stash && git fetch && git checkout master
+	go clean -testcache
+	go test -bench=. -benchmem -benchtime=1s > a.txt
+	go get golang.org/x/tools/cmd/benchcmp
+	benchcmp a.txt b.txt
+	echo ${TNT_CUR_BRANCH}
+	git checkout ${TNT_CUR_BRANCH}
+	git stash pop
+	unset TNT_CUR_BRANCH
