@@ -51,15 +51,15 @@ $ sudo chmod -R a+rwx /usr/local/go </pre>
 ```
 
 The `go-tarantool` package is in
-[tarantool/go-tarantool](github.com/tarantool/go-tarantool) repository.
+[tarantool/go-tarantool](github.com/to6ka/go-tarantool) repository.
 To download and install, say:
 
 ```
-$ go get github.com/tarantool/go-tarantool
+$ go get github.com/to6ka/go-tarantool
 ```
 
 This should bring source and binary files into subdirectories of `/usr/local/go`,
-making it possible to access by adding `github.com/tarantool/go-tarantool` in
+making it possible to access by adding `github.com/to6ka/go-tarantool` in
 the `import {...}` section at the start of any Go program.
 
 <h2>Hello World</h2>
@@ -81,9 +81,9 @@ of terms like "connect", "space", "index", and the requests for creating and
 manipulating database objects or Lua functions.
 
 The source files for the requests library are:
-* [connection.go](https://github.com/tarantool/go-tarantool/blob/master/connection.go)
+* [connection.go](https://github.com/to6ka/go-tarantool/blob/master/connection.go)
   for the `Connect()` function plus functions related to connecting, and
-* [request.go](https://github.com/tarantool/go-tarantool/blob/master/request.go)
+* [request.go](https://github.com/to6ka/go-tarantool/blob/master/request.go)
   for data-manipulation functions and Lua invocations.
 
 See comments in those files for syntax details:
@@ -106,7 +106,7 @@ Tarantool manual. There are also Typed and Async versions of each data-manipulat
 function.
 
 The source file for error-handling tools is
-[errors.go](https://github.com/tarantool/go-tarantool/blob/master/errors.go),
+[errors.go](https://github.com/to6ka/go-tarantool/blob/master/errors.go),
 which has structure definitions and constants whose names are equivalent to names
 of errors that the Tarantool server returns.
 
@@ -120,7 +120,7 @@ package main
 
 import (
      "fmt"
-     "github.com/tarantool/go-tarantool"
+     "github.com/to6ka/go-tarantool"
 )
 
 func main() {
@@ -138,7 +138,7 @@ func main() {
 }
 ```
 
-**Observation 1:** the line "`github.com/tarantool/go-tarantool`" in the
+**Observation 1:** the line "`github.com/to6ka/go-tarantool`" in the
 `import(...)` section brings in all Tarantool-related functions and structures.
 
 **Observation 2:** the line beginning with "`Opts :=`" sets up the options for
@@ -169,7 +169,7 @@ There are two parameters:
 ## Help
 
 To contact `go-tarantool` developers on any problems, create an issue at
-[tarantool/go-tarantool](http://github.com/tarantool/go-tarantool/issues).
+[tarantool/go-tarantool](http://github.com/to6ka/go-tarantool/issues).
 
 The developers of the [Tarantool server](http://github.com/tarantool/tarantool)
 will also be happy to provide advice or receive feedback.
@@ -180,7 +180,7 @@ will also be happy to provide advice or receive feedback.
 package main
 
 import (
-	"github.com/tarantool/go-tarantool"
+	"github.com/to6ka/go-tarantool"
 	"log"
 	"time"
 )
@@ -296,8 +296,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/tarantool/go-tarantool"
-	_ "github.com/tarantool/go-tarantool/uuid"
+	"github.com/to6ka/go-tarantool"
+	_ "github.com/to6ka/go-tarantool/uuid"
 	"github.com/google/uuid"
 )
 
@@ -370,7 +370,7 @@ a custom packer/unpacker, but it will work slower.
 
 ```go
 import (
-	"github.com/tarantool/go-tarantool"
+	"github.com/to6ka/go-tarantool"
 	"gopkg.in/vmihailenco/msgpack.v2"
 )
 
@@ -554,8 +554,8 @@ func decodeTuple(d *msgpack.Decoder, v reflect.Value) error {
 package main
 import (
 	"gopkg.in/vmihailenco/msgpack.v2"
-	"github.com/tarantool/go-tarantool"
-	"github.com/tarantool/go-tarantool/queue"
+	"github.com/to6ka/go-tarantool"
+	"github.com/to6ka/go-tarantool/queue"
 	"time"
 	"fmt"
 	"log"

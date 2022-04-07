@@ -1,4 +1,4 @@
-module github.com/tarantool/go-tarantool
+module github.com/to6ka/go-tarantool
 
 go 1.11
 

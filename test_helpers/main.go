@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/tarantool/go-tarantool"
+	"github.com/to6ka/go-tarantool"
 )
 
 type StartOpts struct {
@@ -174,7 +174,7 @@ func StartTarantool(startOpts StartOpts) (TarantoolInstance, error) {
 
 	// Try to connect and ping tarantool.
 	// Using reconnect opts do not help on Connect,
-	// see https://github.com/tarantool/go-tarantool/issues/136
+	// see https://github.com/to6ka/go-tarantool/issues/136
 	time.Sleep(startOpts.WaitStart)
 
 	opts := tarantool.Opts{

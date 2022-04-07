@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/tarantool/go-tarantool"
-	"github.com/tarantool/go-tarantool/queue"
-	"github.com/tarantool/go-tarantool/test_helpers"
+	. "github.com/to6ka/go-tarantool"
+	"github.com/to6ka/go-tarantool/queue"
+	"github.com/to6ka/go-tarantool/test_helpers"
 	"gopkg.in/vmihailenco/msgpack.v2"
 )
 

@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	. "github.com/tarantool/go-tarantool"
-	"github.com/tarantool/go-tarantool/test_helpers"
-	_ "github.com/tarantool/go-tarantool/uuid"
+	. "github.com/to6ka/go-tarantool"
+	"github.com/to6ka/go-tarantool/test_helpers"
+	_ "github.com/to6ka/go-tarantool/uuid"
 	"gopkg.in/vmihailenco/msgpack.v2"
 )
 

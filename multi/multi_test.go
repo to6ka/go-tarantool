@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tarantool/go-tarantool"
-	"github.com/tarantool/go-tarantool/test_helpers"
+	"github.com/to6ka/go-tarantool"
+	"github.com/to6ka/go-tarantool/test_helpers"
 )
 
 var server1 = "127.0.0.1:3013"

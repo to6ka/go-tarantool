@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tarantool/go-tarantool"
+	"github.com/to6ka/go-tarantool"
 )
 
 type Tuple struct {
